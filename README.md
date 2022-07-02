@@ -1,16 +1,22 @@
 # learning-tdengine
 
+## Note
+
+1. 因為 Taos 的驅動是 C 寫的，所以都要先安裝驅動 (不管你是用 jdbc or golang)
+
+## Tools (db)
+
 ## SQL
 
 ```sql
-create database demo;
+create database demo keep 365 precision "us";
 CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
 CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
 
 create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
 ```
 
-## 安装 (windows)
+## 安装
 
 1. 启动 Tdengine (docker)
 

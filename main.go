@@ -32,10 +32,10 @@ type Metadata struct {
 func main() {
 	pwd, _ := os.Getwd()
 	metadata := []Metadata{
-		// {
-		// 	Filename: "gate_trades_btc_usdt",
-		// 	Market:   "BTC/USDT",
-		// },
+		{
+			Filename: "gate_trades_btc_usdt",
+			Market:   "BTC/USDT",
+		},
 		{
 			Filename: "gate_trades_eth_usdt",
 			Market:   "ETH/USDT",
@@ -76,7 +76,7 @@ func insert(metadata Metadata, data []*Trade) error {
 		//sb.WriteString(fmt.Sprintf("('%s', %s, %f, %f, %d),", trade.Ts.Format("2006-01-02 15:04:05"), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Side))
 		//unixMilli := trade.Ts.UnixMilli() + int64(mi)
 
-		sb.WriteString(fmt.Sprintf("(%d, %s, %f, %f, %d),", trade.Ts.UnixMilli(), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Side))
+		sb.WriteString(fmt.Sprintf("(%d, %s, %f, %f, %d),", trade.Ts.UnixMicro(), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Side))
 
 		if idx%10000 == 9999 || idx == len(data)-1 {
 			sql := sb.String()
@@ -112,23 +112,20 @@ func Load(path string) []*Trade {
 			log.Fatalln(err)
 		}
 
-		t := strings.Split(strings.TrimSpace(record[0]), ".")
+		f, err := strconv.ParseFloat(strings.TrimSpace(record[0]), 64)
+		if err != nil {
+			panic(err)
+		}
 
-		t0, err := strconv.ParseInt(t[0], 10, 64)
-		if err != nil {
-			panic(err)
-		}
-		t1, err := strconv.ParseInt(t[1], 10, 64)
-		if err != nil {
-			panic(err)
-		}
+		t := f * 1000000
+
 		side, err := strconv.Atoi(strings.TrimSpace(record[4]))
 		if err != nil {
 			panic(err)
 		}
 
 		trade := &Trade{
-			Ts:      time.Unix(t0, t1),
+			Ts:      time.UnixMicro(int64(t)),
 			OrderID: record[1],
 			Price:   decimal.RequireFromString(strings.TrimSpace(record[2])),
 			Size:    decimal.RequireFromString(strings.TrimSpace(record[3])),
