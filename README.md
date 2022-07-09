@@ -10,18 +10,11 @@
 
 ```sql
 create database demo keep 365 precision "us";
-CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
+CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, vol DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
 CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
 
 create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
-```
-
-## 安装
-
-1. 启动 Tdengine (docker)
-
-   ```shell
-   docker run -d --name tdengine --hostname="tdengine" -p 6030-6049:6030-6049 -p 6030-6049:6030-6049/udp tdengine/tdengine
+r run -d --name tdengine --hostname="tdengine" -p 6030-6049:6030-6049 -p 6030-6049:6030-6049/udp tdengine/tdengine
    ```
 
 2. 修改 host file, 加入你的 IP
