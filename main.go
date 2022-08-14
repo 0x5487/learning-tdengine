@@ -33,13 +33,9 @@ func main() {
 	pwd, _ := os.Getwd()
 	metadata := []Metadata{
 		{
-			Filename: "gate_trades_btc_udst_04",
+			Filename: "gate_trades_btc_usdt",
 			Market:   "BTC/USDT",
 		},
-		// {
-		// 	Filename: "gate_trades_btc_usdt",
-		// 	Market:   "BTC/USDT",
-		// },
 		// {
 		// 	Filename: "gate_trades_eth_usdt",
 		// 	Market:   "ETH/USDT",
@@ -53,46 +49,6 @@ func main() {
 		_ = insert(metainfo, trades)
 	}
 
-}
-
-func insertByOpenTSDB() error {
-	conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
-	defer conn.Close()
-
-	if err != nil {
-		fmt.Println("failed to connect, err:", err)
-	} else {
-		fmt.Println("connected")
-	}
-
-	// batch insert
-	// rows := []string{}
-	// for _, trade := range data {
-
-	// 	row := fmt.Sprintf("%s %d %s %f %f %f %d market=%s vendor=%s", "trade", trade.Ts.UnixMilli(), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Price.Mul(trade.Size).BigFloat(), trade.Side, metadata.Market, "gate")
-	// 	fmt.Println(row)
-	// 	rows = append(rows, row)
-
-	// 	if len(rows) >= 10000 {
-	// 		err = conn.OpenTSDBInsertTelnetLines(rows)
-	// 		if err != nil {
-	// 			fmt.Println("insert error:", err)
-	// 		}
-
-	// 		rows = []string{}
-	// 	}
-	// }
-
-	var lines = []string{
-		`trade3,market=BTC/USDT,vendor=gate order_id="3370101468",price=37714.980000,size=0.050000,vol=1885.749000,side=1,aa=1 1651360533384`,
-	}
-
-	err = conn.InfluxDBInsertLines(lines, "ms")
-	if err != nil {
-		fmt.Println("insert error:", err)
-	}
-
-	return nil
 }
 
 func insert(metadata Metadata, data []*Trade) error {
@@ -179,4 +135,44 @@ func Load(path string) []*Trade {
 	}
 
 	return result
+}
+
+func insertByOpenTSDB() error {
+	conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
+	defer conn.Close()
+
+	if err != nil {
+		fmt.Println("failed to connect, err:", err)
+	} else {
+		fmt.Println("connected")
+	}
+
+	// batch insert
+	// rows := []string{}
+	// for _, trade := range data {
+
+	// 	row := fmt.Sprintf("%s %d %s %f %f %f %d market=%s vendor=%s", "trade", trade.Ts.UnixMilli(), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Price.Mul(trade.Size).BigFloat(), trade.Side, metadata.Market, "gate")
+	// 	fmt.Println(row)
+	// 	rows = append(rows, row)
+
+	// 	if len(rows) >= 10000 {
+	// 		err = conn.OpenTSDBInsertTelnetLines(rows)
+	// 		if err != nil {
+	// 			fmt.Println("insert error:", err)
+	// 		}
+
+	// 		rows = []string{}
+	// 	}
+	// }
+
+	var lines = []string{
+		`trade3,market=BTC/USDT,vendor=gate order_id="3370101468",price=37714.980000,size=0.050000,vol=1885.749000,side=1,aa=1 1651360533384`,
+	}
+
+	err = conn.InfluxDBInsertLines(lines, "ms")
+	if err != nil {
+		fmt.Println("insert error:", err)
+	}
+
+	return nil
 }

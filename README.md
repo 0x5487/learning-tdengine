@@ -14,8 +14,9 @@ CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE
 CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
 
 create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
-r run -d --name tdengine --hostname="tdengine" -p 6030-6049:6030-6049 -p 6030-6049:6030-6049/udp tdengine/tdengine
-   ```
+```
+
+1. docker run -d --name tdengine --hostname="tdengine" -p 6030-6049:6030-6049 -p 6030-6049:6030-6049/udp tdengine/tdengine:3.0.0.0
 
 2. 修改 host file, 加入你的 IP
 
