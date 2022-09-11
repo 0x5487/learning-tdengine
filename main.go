@@ -1,10 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/csv"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -12,8 +12,11 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/taosdata/driver-go/v2/af"
-	_ "github.com/taosdata/driver-go/v2/taosSql"
+	"github.com/taosdata/driver-go/v3/af"
+	_ "github.com/taosdata/driver-go/v3/taosRestful"
+
+	"github.com/nite-coder/blackbear/pkg/log"
+	"github.com/nite-coder/blackbear/pkg/log/handler/console"
 )
 
 type Trade struct {
@@ -30,6 +33,11 @@ type Metadata struct {
 }
 
 func main() {
+	logger := log.New()
+	clog := console.New()
+	logger.AddHandler(clog, log.AllLevels...)
+	log.SetLogger(logger)
+
 	pwd, _ := os.Getwd()
 	metadata := []Metadata{
 		{
@@ -45,21 +53,22 @@ func main() {
 	for _, metainfo := range metadata {
 		path := filepath.Join(pwd, "test", metainfo.Filename+".csv")
 		trades := Load(path)
-		fmt.Println("filename: ", metainfo.Filename, " count: ", len(trades))
+		log.Infof("filename: %s, count: %d ", metainfo.Filename, len(trades))
 		_ = insert(metainfo, trades)
 	}
 
 }
 
 func insert(metadata Metadata, data []*Trade) error {
-	conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
-	defer conn.Close()
-
+	//conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
+	var taosDSN = "root:taosdata@http(host.docker.internal:6041)/demo"
+	conn, err := sql.Open("taosRestful", taosDSN)
 	if err != nil {
-		fmt.Println("failed to connect, err:", err)
-	} else {
-		fmt.Println("connected")
+		log.Err(err).Error("can't conn to tdengine")
+		return err
 	}
+	defer conn.Close()
+	log.Info("connected.")
 
 	// batch insert
 	sb := strings.Builder{}
@@ -95,7 +104,7 @@ func insert(metadata Metadata, data []*Trade) error {
 func Load(path string) []*Trade {
 	file, err := os.OpenFile(path, os.O_RDONLY, 0777) // os.O_RDONLY 表示只讀、0777 表示(owner/group/other)權限
 	if err != nil {
-		log.Fatalln("找不到CSV檔案路徑:", path, err)
+		log.Fatalf("找不到CSV檔案路徑:", path, err)
 	}
 
 	result := make([]*Trade, 0, 1000000)
@@ -109,7 +118,7 @@ func Load(path string) []*Trade {
 			break
 		}
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalf("%v", err)
 		}
 
 		f, err := strconv.ParseFloat(strings.TrimSpace(record[0]), 64)

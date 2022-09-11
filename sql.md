@@ -1,3 +1,12 @@
+## SQL
+
+```sql
+create database demo keep 365 precision "us";
+CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, vol DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
+CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
+
+create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
+```
 
 ## 每秒 K line
 

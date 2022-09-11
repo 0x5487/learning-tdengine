@@ -3,18 +3,12 @@
 ## Note
 
 1. 因為 Taos 的驅動是 C 寫的，所以都要先安裝驅動 (不管你是用 jdbc or golang)
+<https://www.taosdata.com/assets-download/3.0/TDengine-client-3.0.1.0-Linux-x64-Lite.tar.gz>
+
+1. tdengine 預設密碼 root:taosdata
+1. Ddweaver 工具: <https://www.taosdata.com/engineering/12880.html>
 
 ## Tools (db)
-
-## SQL
-
-```sql
-create database demo keep 365 precision "us";
-CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, vol DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
-CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
-
-create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
-```
 
 1. docker run -d --name tdengine --hostname="tdengine" -p 6030-6049:6030-6049 -p 6030-6049:6030-6049/udp tdengine/tdengine:3.0.0.0
 
@@ -26,7 +20,7 @@ create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBL
 
 3. 安装 windows drivers, 建立连线, 参考 [建立連接 | TDengine 文檔 | 濤思數據 (taosdata.com)](https://docs.taosdata.com/develop/connect/)
 
-4.
+4. jdbc:TAOS-RS://localhost:6041
 
 ## 写入资料
 
