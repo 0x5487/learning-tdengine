@@ -3,17 +3,16 @@
 ```sql
 create database demo keep 365 precision "us";
 CREATE STABLE trades(ts timestamp, order_id NCHAR(40), price DOUBLE, size DOUBLE, vol DOUBLE, side TINYINT) TAGS (market NCHAR(16), vendor NCHAR(16));
-CREATE TABLE gate_trades_btc_usdt USING trades TAGS ("BTC/USDT", "gate");
+CREATE TABLE trades_btc_usdt_gate USING trades TAGS ("BTC/USDT", "gate");
 
-create table btc_usdt(ts timestamp, order_id NCHAR(30), price DOUBLE, size DOUBLE, side TINYINT);
 ```
 
 ## 每秒 K line
 
-select first(price) as open, max(price) as high, min(price) as low, last(price) as close, sum(size) as base_vol, sum(vol) as quote_vol
+select _wstart, first(price) as open, max(price) as high, min(price) as low, last(price) as close, sum(size) as base_vol, sum(vol) as quote_vol, first(price) - last(price) as delta, (first(price) / last(price) - 1) % 100 as percentage
 from trades
-interval(1s)
-order by ts asc
+interval(5m)
+order by _wstart desc
 limit 10;
 
 ## k-line (1s)

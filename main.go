@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
-	"github.com/taosdata/driver-go/v3/af"
-	_ "github.com/taosdata/driver-go/v3/taosRestful"
+
+	_ "github.com/taosdata/driver-go/v3/taosSql"
 
 	"github.com/nite-coder/blackbear/pkg/log"
 	"github.com/nite-coder/blackbear/pkg/log/handler/console"
@@ -41,7 +41,7 @@ func main() {
 	pwd, _ := os.Getwd()
 	metadata := []Metadata{
 		{
-			Filename: "gate_trades_btc_usdt",
+			Filename: "trades_btc_usdt_gate",
 			Market:   "BTC/USDT",
 		},
 		// {
@@ -60,9 +60,8 @@ func main() {
 }
 
 func insert(metadata Metadata, data []*Trade) error {
-	//conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
-	var taosDSN = "root:taosdata@http(host.docker.internal:6041)/demo"
-	conn, err := sql.Open("taosRestful", taosDSN)
+	var taosDSN = "root:taosdata@tcp(host.docker.internal:6030)/demo"
+	conn, err := sql.Open("taosSql", taosDSN)
 	if err != nil {
 		log.Err(err).Error("can't conn to tdengine")
 		return err
@@ -144,44 +143,4 @@ func Load(path string) []*Trade {
 	}
 
 	return result
-}
-
-func insertByOpenTSDB() error {
-	conn, err := af.Open("host.docker.internal", "root", "taosdata", "demo", 6030)
-	defer conn.Close()
-
-	if err != nil {
-		fmt.Println("failed to connect, err:", err)
-	} else {
-		fmt.Println("connected")
-	}
-
-	// batch insert
-	// rows := []string{}
-	// for _, trade := range data {
-
-	// 	row := fmt.Sprintf("%s %d %s %f %f %f %d market=%s vendor=%s", "trade", trade.Ts.UnixMilli(), trade.OrderID, trade.Price.BigFloat(), trade.Size.BigFloat(), trade.Price.Mul(trade.Size).BigFloat(), trade.Side, metadata.Market, "gate")
-	// 	fmt.Println(row)
-	// 	rows = append(rows, row)
-
-	// 	if len(rows) >= 10000 {
-	// 		err = conn.OpenTSDBInsertTelnetLines(rows)
-	// 		if err != nil {
-	// 			fmt.Println("insert error:", err)
-	// 		}
-
-	// 		rows = []string{}
-	// 	}
-	// }
-
-	var lines = []string{
-		`trade3,market=BTC/USDT,vendor=gate order_id="3370101468",price=37714.980000,size=0.050000,vol=1885.749000,side=1,aa=1 1651360533384`,
-	}
-
-	err = conn.InfluxDBInsertLines(lines, "ms")
-	if err != nil {
-		fmt.Println("insert error:", err)
-	}
-
-	return nil
 }
